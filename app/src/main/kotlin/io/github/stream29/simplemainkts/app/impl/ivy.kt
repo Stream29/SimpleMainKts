@@ -27,7 +27,7 @@ import kotlin.script.experimental.dependencies.impl.toRepositoryUrlOrNull
 
 class IvyResolver : ExternalDependenciesResolver {
 
-    private fun String?.isValidParam() = this?.isNotBlank() ?: false
+    private fun String?.isValidParam() = this?.isNotBlank() == true
 
     override fun acceptsArtifact(artifactCoordinates: String): Boolean = with(artifactCoordinates) {
         isValidParam() && count { it == ':' }.let { it == 2 || it == 3 }
@@ -118,6 +118,7 @@ class IvyResolver : ExternalDependenciesResolver {
         // val report = ivy.resolve(moduleDescriptor, resolveOptions)
 
         //creates an ivy configuration file
+
         val ivyFile = createTempFile("ivy", ".xml").apply { deleteOnExit() }
         XmlModuleDescriptorWriter.write(moduleDescriptor, ivyFile)
         val report = ivy.resolve(ivyFile.toURI().toURL(), resolveOptions)

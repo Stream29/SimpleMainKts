@@ -31,7 +31,7 @@ suspend fun resolveFromAnnotations(resolver: ExternalDependenciesResolver, annot
             else -> return makeFailureResult("Unknown annotation ${annotation.javaClass}")
         }
     }
-    return annotations.filterIsInstance(DependsOn::class.java).flatMapSuccess { annotation ->
+    return annotations.filterIsInstance<DependsOn>().flatMapSuccess { annotation ->
         annotation.artifactsCoordinates.asIterable().flatMapSuccess { artifactCoordinates ->
             resolver.resolve(artifactCoordinates)
         }

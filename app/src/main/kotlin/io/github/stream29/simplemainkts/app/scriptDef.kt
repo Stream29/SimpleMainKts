@@ -39,7 +39,7 @@ import kotlin.script.experimental.jvmhost.CompiledScriptJarsCache
     // the class or object that defines script evaluation configuration for this type of scripts
     evaluationConfiguration = MainKtsEvaluationConfiguration::class
 )
-// the class is used as the script base class, therefore it should be open or abstract. Also the constructor parameters
+// the class is used as the script base class, therefore it should be open or abstract. Also, the constructor parameters
 // of the base class are copied to the script constructor, so with this definition the script will require `args` to be
 // passed to the constructor, and `args` could be used in the script as a defined variable.
 abstract class SimpleMainKtsScript(val args: Array<String>)
@@ -97,7 +97,10 @@ object MainKtsEvaluationConfiguration : ScriptEvaluationConfiguration(
         implicitReceivers("")
         refineConfigurationBeforeEvaluate(::configureConstructorArgsFromMainArgs)
     }
-)
+) {
+    @Suppress("unused")
+    private fun readResolve(): Any = MainKtsEvaluationConfiguration
+}
 
 fun configureConstructorArgsFromMainArgs(context: ScriptEvaluationConfigurationRefinementContext): ResultWithDiagnostics<ScriptEvaluationConfiguration> {
     val mainArgs = context.evaluationConfiguration[ScriptEvaluationConfiguration.jvm.mainArguments]
@@ -171,9 +174,9 @@ internal fun URL.toContainingJarOrNull(): File? =
 internal fun URL.toFileOrNull() =
     try {
         File(toURI())
-    } catch (e: IllegalArgumentException) {
+    } catch (_: IllegalArgumentException) {
         null
-    } catch (e: URISyntaxException) {
+    } catch (_: URISyntaxException) {
         null
     } ?: run {
         if (protocol != "file") null
