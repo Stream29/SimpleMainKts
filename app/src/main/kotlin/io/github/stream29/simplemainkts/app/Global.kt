@@ -1,8 +1,6 @@
 package io.github.stream29.simplemainkts.app
 
-import kotlin.script.experimental.api.constructorArgs
-import kotlin.script.experimental.api.enableScriptsInstancesSharing
-import kotlin.script.experimental.api.with
+import kotlin.script.experimental.api.*
 import kotlin.script.experimental.jvm.baseClassLoader
 import kotlin.script.experimental.jvm.jvm
 import kotlin.script.experimental.jvmhost.BasicJvmScriptingHost
@@ -13,7 +11,10 @@ val scriptDefinition = createJvmCompilationConfigurationFromTemplate<SimpleMainK
 val host = BasicJvmScriptingHost()
 
 val evaluationConfig =
-    MainKtsEvaluationConfiguration.with {
+    MainKtsEvaluationConfiguration {
+        scriptsInstancesSharing(true)
+        implicitReceivers("hello")
+        refineConfigurationBeforeEvaluate(::configureConstructorArgsFromMainArgs)
         jvm {
             baseClassLoader(null)
         }

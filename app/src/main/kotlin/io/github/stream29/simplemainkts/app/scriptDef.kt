@@ -9,9 +9,6 @@ import io.github.stream29.simplemainkts.app.impl.IvyResolver
 import io.github.stream29.simplemainkts.app.impl.resolveFromAnnotations
 import kotlinx.coroutines.runBlocking
 import java.io.File
-import java.net.JarURLConnection
-import java.net.URISyntaxException
-import java.net.URL
 import java.security.MessageDigest
 import kotlin.script.experimental.annotations.KotlinScript
 import kotlin.script.experimental.api.*
@@ -82,16 +79,9 @@ class SimpleMainKtsScriptDefinition : ScriptCompilationConfiguration(
         })
     })
 
-object MainKtsEvaluationConfiguration : ScriptEvaluationConfiguration(
-    {
-        scriptsInstancesSharing(true)
-        implicitReceivers("hello")
-        refineConfigurationBeforeEvaluate(::configureConstructorArgsFromMainArgs)
-    }
-) {
-    @Suppress("unused")
-    private fun readResolve(): Any = MainKtsEvaluationConfiguration
-}
+class MainKtsEvaluationConfiguration(
+    block: Builder.() -> Unit
+) : ScriptEvaluationConfiguration(block)
 
 fun configureConstructorArgsFromMainArgs(context: ScriptEvaluationConfigurationRefinementContext): ResultWithDiagnostics<ScriptEvaluationConfiguration> {
     val mainArgs = context.evaluationConfiguration[ScriptEvaluationConfiguration.jvm.mainArguments]
@@ -163,20 +153,3 @@ private fun compiledScriptUniqueName(
 }
 
 private fun ByteArray.toHexString(): String = joinToString("", transform = { "%02x".format(it) })
-
-internal fun URL.toContainingJarOrNull(): File? =
-    if (protocol == "jar") {
-        (openConnection() as? JarURLConnection)?.jarFileURL?.toFileOrNull()
-    } else null
-
-internal fun URL.toFileOrNull() =
-    try {
-        File(toURI())
-    } catch (_: IllegalArgumentException) {
-        null
-    } catch (_: URISyntaxException) {
-        null
-    } ?: run {
-        if (protocol != "file") null
-        else File(file)
-    }
