@@ -41,43 +41,7 @@ import kotlin.script.experimental.jvmhost.CompiledScriptJarsCache
 // passed to the constructor, and `args` could be used in the script as a defined variable.
 abstract class SimpleMainKtsScript(val args: Array<String>)
 
-class SimpleMainKtsScriptDefinition : ScriptCompilationConfiguration(
-    {
-        defaultImports(DependsOn::class, Repository::class, Import::class, CompilerOptions::class)
-        implicitReceivers(String::class)
-        jvm {
-            dependenciesFromClassContext(
-                SimpleMainKtsScriptDefinition::class,
-                "kotlin-stdlib", "kotlin-reflect", "kotlin-scripting-dependencies",
-                wholeClasspath = true
-            )
-        }
-
-        refineConfiguration {
-            onAnnotations(
-                DependsOn::class,
-                Repository::class,
-                Import::class,
-                CompilerOptions::class,
-                handler = MainKtsConfigurator()
-            )
-        }
-        ide {
-            acceptedLocations(ScriptAcceptedLocation.Everywhere)
-        }
-        hostConfiguration(ScriptingHostConfiguration {
-            jvm {
-                compilationCache(
-                    CompiledScriptJarsCache { script, scriptCompilationConfiguration ->
-                        File(
-                            cacheLocation,
-                            compiledScriptUniqueName(script, scriptCompilationConfiguration) + ".jar"
-                        )
-                    }
-                )
-            }
-        })
-    })
+class SimpleMainKtsScriptDefinition : ScriptCompilationConfiguration()
 
 class MainKtsEvaluationConfiguration(
     block: Builder.() -> Unit
@@ -137,7 +101,7 @@ class MainKtsConfigurator : RefineScriptCompilationConfigurationHandler {
     }
 }
 
-private fun compiledScriptUniqueName(
+internal fun compiledScriptUniqueName(
     script: SourceCode,
     scriptCompilationConfiguration: ScriptCompilationConfiguration
 ): String {
