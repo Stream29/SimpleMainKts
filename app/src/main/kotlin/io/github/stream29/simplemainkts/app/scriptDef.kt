@@ -47,17 +47,6 @@ class MainKtsEvaluationConfiguration(
     block: Builder.() -> Unit
 ) : ScriptEvaluationConfiguration(block)
 
-fun configureConstructorArgsFromMainArgs(context: ScriptEvaluationConfigurationRefinementContext): ResultWithDiagnostics<ScriptEvaluationConfiguration> {
-    val mainArgs = context.evaluationConfiguration[ScriptEvaluationConfiguration.jvm.mainArguments]
-    val res =
-        if (context.evaluationConfiguration[ScriptEvaluationConfiguration.constructorArgs] == null && mainArgs != null) {
-            context.evaluationConfiguration.with {
-                constructorArgs(mainArgs)
-            }
-        } else context.evaluationConfiguration
-    return res.asSuccess()
-}
-
 class MainKtsConfigurator : RefineScriptCompilationConfigurationHandler {
     private val resolver = CompoundDependenciesResolver(FileSystemDependenciesResolver(), IvyResolver())
 

@@ -9,6 +9,7 @@ import kotlin.script.experimental.jvm.baseClassLoader
 import kotlin.script.experimental.jvm.compilationCache
 import kotlin.script.experimental.jvm.dependenciesFromClassContext
 import kotlin.script.experimental.jvm.jvm
+import kotlin.script.experimental.jvm.mainArguments
 import kotlin.script.experimental.jvmhost.BasicJvmScriptingHost
 import kotlin.script.experimental.jvmhost.CompiledScriptJarsCache
 import kotlin.script.experimental.jvmhost.createJvmCompilationConfigurationFromTemplate
@@ -56,7 +57,16 @@ val evaluationConfig =
     MainKtsEvaluationConfiguration {
         scriptsInstancesSharing(true)
         implicitReceivers("hello")
-        refineConfigurationBeforeEvaluate(::configureConstructorArgsFromMainArgs)
+        refineConfigurationBeforeEvaluate {
+            val mainArgs = it.evaluationConfiguration[ScriptEvaluationConfiguration.jvm.mainArguments]
+            val res =
+                if (it.evaluationConfiguration[ScriptEvaluationConfiguration.constructorArgs] == null && mainArgs != null) {
+                    it.evaluationConfiguration.with {
+                        constructorArgs(mainArgs)
+                    }
+                } else it.evaluationConfiguration
+            res.asSuccess()
+        }
         jvm {
             baseClassLoader(null)
         }
