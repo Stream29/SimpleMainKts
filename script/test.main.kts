@@ -6,6 +6,8 @@
 @file:DependsOn("io.ktor:ktor-client-content-negotiation-jvm:3.0.0")
 @file:DependsOn("io.ktor:ktor-client-auth-jvm:3.0.0")
 
+package script
+
 import com.aallam.openai.api.logging.LogLevel
 import com.aallam.openai.client.LoggingConfig
 import com.aallam.openai.client.OpenAIConfig
@@ -16,7 +18,7 @@ import io.github.stream29.langchain4kt.core.generateFrom
 import io.ktor.client.engine.cio.*
 import kotlinx.coroutines.runBlocking
 
-println(io.github.stream29.simplemainkts.app.host)
+println(io.github.stream29.simplemainkts.app.TestClasspath)
 
 val clientConfig = OpenAIConfig(
     token = System.getenv("ALIBABA_QWEN_API_KEY")!!,

@@ -1,5 +1,6 @@
 package io.github.stream29.simplemainkts.app
 
+import org.jetbrains.kotlin.com.google.common.net.HostSpecifier
 import java.io.File
 import java.security.MessageDigest
 import kotlin.script.experimental.api.*
@@ -7,6 +8,7 @@ import kotlin.script.experimental.host.ScriptingHostConfiguration
 import kotlin.script.experimental.jvm.baseClassLoader
 import kotlin.script.experimental.jvm.compilationCache
 import kotlin.script.experimental.jvm.dependenciesFromClassContext
+import kotlin.script.experimental.jvm.dependenciesFromClassloader
 import kotlin.script.experimental.jvm.jvm
 import kotlin.script.experimental.jvmhost.BasicJvmScriptingHost
 import kotlin.script.experimental.jvmhost.CompiledScriptJarsCache
@@ -18,7 +20,7 @@ inline fun <reified T> compileConfig(): ScriptCompilationConfiguration.Builder.(
         implicitReceivers(T::class)
         jvm {
             dependenciesFromClassContext(
-                TestClasspath::class,
+                EmptyPackage::class,
                 wholeClasspath = true
             )
         }
