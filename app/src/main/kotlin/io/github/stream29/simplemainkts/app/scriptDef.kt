@@ -5,9 +5,9 @@
 
 package io.github.stream29.simplemainkts.app
 
-import kotlinx.coroutines.runBlocking
 import io.github.stream29.simplemainkts.app.impl.IvyResolver
 import io.github.stream29.simplemainkts.app.impl.resolveFromAnnotations
+import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.net.JarURLConnection
 import java.net.URISyntaxException
@@ -44,49 +44,40 @@ import kotlin.script.experimental.jvmhost.CompiledScriptJarsCache
 // passed to the constructor, and `args` could be used in the script as a defined variable.
 abstract class SimpleMainKtsScript(val args: Array<String>)
 
-const val COMPILED_SCRIPTS_CACHE_DIR_ENV_VAR = "KOTLIN_SIMPLE_MAIN_KTS_COMPILED_SCRIPTS_CACHE_DIR"
-const val COMPILED_SCRIPTS_CACHE_DIR_PROPERTY = "kotlin.simple.main.kts.compiled.scripts.cache.dir"
-
 class SimpleMainKtsScriptDefinition : ScriptCompilationConfiguration(
     {
         defaultImports(DependsOn::class, Repository::class, Import::class, CompilerOptions::class)
         implicitReceivers(String::class)
         jvm {
-            val keyResource = SimpleMainKtsScriptDefinition::class.java.name.replace('.', '/') + ".class"
-            val thisJarFile = SimpleMainKtsScriptDefinition::class.java.classLoader.getResource(keyResource)?.toContainingJarOrNull()
-            if (thisJarFile != null) {
-                dependenciesFromClassContext(
-                        SimpleMainKtsScriptDefinition::class,
-                        thisJarFile.name, "kotlin-stdlib", "kotlin-reflect", "kotlin-scripting-dependencies"
-                )
-            } else {
-                dependenciesFromClassContext(SimpleMainKtsScriptDefinition::class, wholeClasspath = true)
-            }
+            dependenciesFromClassContext(
+                SimpleMainKtsScriptDefinition::class,
+                "kotlin-stdlib", "kotlin-reflect", "kotlin-scripting-dependencies",
+                wholeClasspath = true
+            )
         }
 
         refineConfiguration {
-            onAnnotations(DependsOn::class, Repository::class, Import::class, CompilerOptions::class, handler = MainKtsConfigurator())
+            onAnnotations(
+                DependsOn::class,
+                Repository::class,
+                Import::class,
+                CompilerOptions::class,
+                handler = MainKtsConfigurator()
+            )
         }
         ide {
             acceptedLocations(ScriptAcceptedLocation.Everywhere)
         }
         hostConfiguration(ScriptingHostConfiguration {
             jvm {
-                val cacheExtSetting = System.getProperty(COMPILED_SCRIPTS_CACHE_DIR_PROPERTY)
-                    ?: System.getenv(COMPILED_SCRIPTS_CACHE_DIR_ENV_VAR)
-                val cacheBaseDir = when {
-                    cacheExtSetting == null -> System.getProperty("java.io.tmpdir")
-                        ?.let(::File)?.takeIf { it.exists() && it.isDirectory }
-                        ?.let { File(it, "main.kts.compiled.cache").apply { mkdir() } }
-                    cacheExtSetting.isBlank() -> null
-                    else -> File(cacheExtSetting)
-                }?.takeIf { it.exists() && it.isDirectory }
-                if (cacheBaseDir != null)
-                    compilationCache(
-                        CompiledScriptJarsCache { script, scriptCompilationConfiguration ->
-                            File(cacheBaseDir, compiledScriptUniqueName(script, scriptCompilationConfiguration) + ".jar")
-                        }
-                    )
+                compilationCache(
+                    CompiledScriptJarsCache { script, scriptCompilationConfiguration ->
+                        File(
+                            cacheLocation,
+                            compiledScriptUniqueName(script, scriptCompilationConfiguration) + ".jar"
+                        )
+                    }
+                )
             }
         })
     })
@@ -94,7 +85,7 @@ class SimpleMainKtsScriptDefinition : ScriptCompilationConfiguration(
 object MainKtsEvaluationConfiguration : ScriptEvaluationConfiguration(
     {
         scriptsInstancesSharing(true)
-        implicitReceivers("")
+        implicitReceivers("hello")
         refineConfigurationBeforeEvaluate(::configureConstructorArgsFromMainArgs)
     }
 ) {
@@ -104,11 +95,12 @@ object MainKtsEvaluationConfiguration : ScriptEvaluationConfiguration(
 
 fun configureConstructorArgsFromMainArgs(context: ScriptEvaluationConfigurationRefinementContext): ResultWithDiagnostics<ScriptEvaluationConfiguration> {
     val mainArgs = context.evaluationConfiguration[ScriptEvaluationConfiguration.jvm.mainArguments]
-    val res = if (context.evaluationConfiguration[ScriptEvaluationConfiguration.constructorArgs] == null && mainArgs != null) {
-        context.evaluationConfiguration.with {
-            constructorArgs(mainArgs)
-        }
-    } else context.evaluationConfiguration
+    val res =
+        if (context.evaluationConfiguration[ScriptEvaluationConfiguration.constructorArgs] == null && mainArgs != null) {
+            context.evaluationConfiguration.with {
+                constructorArgs(mainArgs)
+            }
+        } else context.evaluationConfiguration
     return res.asSuccess()
 }
 
@@ -139,7 +131,10 @@ class MainKtsConfigurator : RefineScriptCompilationConfigurationHandler {
                 resolveFromAnnotations(resolver, annotations.filter { it is DependsOn || it is Repository })
             }
         } catch (e: Throwable) {
-            ResultWithDiagnostics.Failure(*diagnostics.toTypedArray(), e.asDiagnostics(path = context.script.locationId))
+            ResultWithDiagnostics.Failure(
+                *diagnostics.toTypedArray(),
+                e.asDiagnostics(path = context.script.locationId)
+            )
         }
 
         return resolveResult.onSuccess { resolvedClassPath ->
@@ -152,7 +147,10 @@ class MainKtsConfigurator : RefineScriptCompilationConfigurationHandler {
     }
 }
 
-private fun compiledScriptUniqueName(script: SourceCode, scriptCompilationConfiguration: ScriptCompilationConfiguration): String {
+private fun compiledScriptUniqueName(
+    script: SourceCode,
+    scriptCompilationConfiguration: ScriptCompilationConfiguration
+): String {
     val digestWrapper = MessageDigest.getInstance("MD5")
     digestWrapper.update(script.text.toByteArray())
     scriptCompilationConfiguration.notTransientData.entries
