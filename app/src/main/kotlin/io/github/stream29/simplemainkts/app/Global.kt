@@ -6,16 +6,22 @@ import kotlin.script.experimental.api.*
 import kotlin.script.experimental.host.ScriptingHostConfiguration
 import kotlin.script.experimental.jvm.baseClassLoader
 import kotlin.script.experimental.jvm.compilationCache
+import kotlin.script.experimental.jvm.dependenciesFromClassContext
 import kotlin.script.experimental.jvm.jvm
 import kotlin.script.experimental.jvmhost.BasicJvmScriptingHost
 import kotlin.script.experimental.jvmhost.CompiledScriptJarsCache
 
 val host = BasicJvmScriptingHost()
 
-
 inline fun <reified T> compileConfig(): ScriptCompilationConfiguration.Builder.() -> Unit =
     {
         implicitReceivers(T::class)
+        jvm {
+            dependenciesFromClassContext(
+                TestClasspath::class,
+                wholeClasspath = true
+            )
+        }
         hostConfiguration(ScriptingHostConfiguration {
             jvm {
                 compilationCache(
