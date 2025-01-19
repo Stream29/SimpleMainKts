@@ -1,5 +1,6 @@
 package io.github.stream29.simplemainkts.app
 
+import io.github.stream29.simplemainkts.app.resolve.MainKtsConfigurator
 import org.jetbrains.kotlin.mainKts.CompilerOptions
 import org.jetbrains.kotlin.mainKts.Import
 import org.jetbrains.kotlin.mainKts.MainKtsEvaluationConfiguration
@@ -39,7 +40,7 @@ val compileConfig = createJvmCompilationConfigurationFromTemplate<MainKtsScript>
             Repository::class,
             Import::class,
             CompilerOptions::class,
-            handler = MainKtsConfigurator()
+            handler = MainKtsConfigurator
         )
     }
     ide {

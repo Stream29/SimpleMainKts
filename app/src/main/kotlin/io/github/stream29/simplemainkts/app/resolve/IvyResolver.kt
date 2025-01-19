@@ -3,7 +3,7 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
-package io.github.stream29.simplemainkts.app.impl
+package io.github.stream29.simplemainkts.app.resolve
 
 import org.apache.ivy.Ivy
 import org.apache.ivy.core.LogOptions
@@ -25,7 +25,10 @@ import kotlin.script.experimental.dependencies.ExternalDependenciesResolver
 import kotlin.script.experimental.dependencies.RepositoryCoordinates
 import kotlin.script.experimental.dependencies.impl.toRepositoryUrlOrNull
 
-class IvyResolver : ExternalDependenciesResolver {
+object IvyResolver : ExternalDependenciesResolver {
+    init {
+        Message.setDefaultLogger(DefaultMessageLogger(1))
+    }
 
     private fun String?.isValidParam() = this?.isNotBlank() == true
 
@@ -43,7 +46,8 @@ class IvyResolver : ExternalDependenciesResolver {
     ): ResultWithDiagnostics<List<File>> {
 
         val artifactType = artifactCoordinates.substringAfterLast('@', "").trim()
-        val stringCoordinates = if (artifactType.isNotEmpty()) artifactCoordinates.removeSuffix("@$artifactType") else artifactCoordinates
+        val stringCoordinates =
+            if (artifactType.isNotEmpty()) artifactCoordinates.removeSuffix("@$artifactType") else artifactCoordinates
         return if (acceptsArtifact(stringCoordinates)) {
             val artifactId = stringCoordinates.split(':')
             try {
@@ -146,12 +150,6 @@ class IvyResolver : ExternalDependenciesResolver {
             return true.asSuccess()
         } else {
             return false.asSuccess()
-        }
-    }
-
-    companion object {
-        init {
-            Message.setDefaultLogger(DefaultMessageLogger(1))
         }
     }
 }
