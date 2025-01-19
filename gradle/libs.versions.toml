@@ -19,12 +19,23 @@ kotlin-scripting-common = { module = "org.jetbrains.kotlin:kotlin-scripting-comm
 kotlin-scripting-jvm = { module = "org.jetbrains.kotlin:kotlin-scripting-jvm", version.ref = "kotlin" }
 kotlin-scripting-jvm-host = { module = "org.jetbrains.kotlin:kotlin-scripting-jvm-host", version.ref = "kotlin" }
 kotlin-scripting-dependencies = { module = "org.jetbrains.kotlin:kotlin-scripting-dependencies", version.ref = "kotlin" }
+kotlin-main-kts = { module = "org.jetbrains.kotlin:kotlin-main-kts", version.ref = "kotlin" }
 apache-ivy = { module = "org.apache.ivy:ivy", version.ref = "ivy" }
 
 # Libraries can be bundled together for easier import
 [bundles]
-kotlinx-all = ["kotlinx-datetime", "kotlinx-serialization", "kotlinx-coroutines"]
-kotlin-scripting = ["kotlin-scripting-common", "kotlin-scripting-jvm", "kotlin-scripting-jvm-host", "kotlin-scripting-dependencies"]
+kotlinx-all = [
+    "kotlinx-datetime",
+    "kotlinx-serialization",
+    "kotlinx-coroutines"
+]
+kotlin-scripting = [
+    "kotlin-scripting-common",
+    "kotlin-scripting-jvm",
+    "kotlin-scripting-jvm-host",
+    "kotlin-scripting-dependencies",
+    "kotlin-main-kts"
+]
 
 [plugins]
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

@@ -1,6 +1,5 @@
 package io.github.stream29.simplemainkts.app
 
-import java.io.File
 import kotlin.script.experimental.api.*
 import kotlin.script.experimental.host.toScriptSource
 
@@ -24,6 +23,6 @@ fun main() {
 fun evalString(script: String): ResultWithDiagnostics<EvaluationResult> =
     eval(script.toScriptSource())
 
-fun eval(sourceCode: SourceCode, cacheDir: File? = null): ResultWithDiagnostics<EvaluationResult> =
-    host.eval(sourceCode, scriptDefinition, evaluationConfig)
+fun eval(sourceCode: SourceCode): ResultWithDiagnostics<EvaluationResult> =
+    host.eval(sourceCode, compileConfig, evaluationConfig)
 
