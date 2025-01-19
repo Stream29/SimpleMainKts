@@ -1,51 +1,49 @@
 package io.github.stream29.simplemainkts.app
 
-import org.jetbrains.kotlin.mainKts.CompilerOptions
-import org.jetbrains.kotlin.mainKts.Import
-import org.jetbrains.kotlin.mainKts.MainKtsEvaluationConfiguration
-import org.jetbrains.kotlin.mainKts.MainKtsScript
 import java.io.File
 import java.security.MessageDigest
 import kotlin.script.experimental.api.*
-import kotlin.script.experimental.dependencies.DependsOn
-import kotlin.script.experimental.dependencies.Repository
 import kotlin.script.experimental.host.ScriptingHostConfiguration
 import kotlin.script.experimental.jvm.baseClassLoader
 import kotlin.script.experimental.jvm.compilationCache
 import kotlin.script.experimental.jvm.jvm
 import kotlin.script.experimental.jvmhost.BasicJvmScriptingHost
 import kotlin.script.experimental.jvmhost.CompiledScriptJarsCache
-import kotlin.script.experimental.jvmhost.createJvmCompilationConfigurationFromTemplate
 
 val host = BasicJvmScriptingHost()
 
-val compileConfig = createJvmCompilationConfigurationFromTemplate<MainKtsScript> {
-    defaultImports(DependsOn::class, Repository::class, Import::class, CompilerOptions::class)
-    implicitReceivers(String::class)
-    hostConfiguration(ScriptingHostConfiguration {
-        jvm {
-            compilationCache(
-                CompiledScriptJarsCache { script, scriptCompilationConfiguration ->
-                    File(cacheLocation, compiledScriptUniqueName(script, scriptCompilationConfiguration))
-                }
-            )
-        }
-    })
-}
 
-val evaluationConfig =
-    MainKtsEvaluationConfiguration.with(fun ScriptEvaluationConfiguration.Builder.() {
+inline fun <reified T> compileConfig(): ScriptCompilationConfiguration.Builder.() -> Unit =
+    {
+        implicitReceivers(T::class)
+        hostConfiguration(ScriptingHostConfiguration {
+            jvm {
+                compilationCache(
+                    CompiledScriptJarsCache { script, scriptCompilationConfiguration ->
+                        File(cacheLocation, compiledScriptUniqueName(script, scriptCompilationConfiguration))
+                    }
+                )
+            }
+        })
+    }
+
+fun evaluationConfig(
+    receiver: Any,
+    classLoader: ClassLoader?,
+    args: Array<String>
+): ScriptEvaluationConfiguration.Builder.() -> Unit =
+    {
         scriptsInstancesSharing(true)
-        implicitReceivers("hello")
+        implicitReceivers(receiver)
         jvm {
-            baseClassLoader(null)
+            baseClassLoader(classLoader)
         }
-        constructorArgs(arrayOf("a", "b", "c"))
+        constructorArgs(args)
         enableScriptsInstancesSharing()
-    })
+    }
 
 @OptIn(ExperimentalStdlibApi::class)
-internal fun compiledScriptUniqueName(
+fun compiledScriptUniqueName(
     script: SourceCode,
     scriptCompilationConfiguration: ScriptCompilationConfiguration
 ): String {
