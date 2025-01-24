@@ -18,7 +18,7 @@ import io.github.stream29.langchain4kt.core.generateFrom
 import io.ktor.client.engine.cio.*
 import kotlinx.coroutines.runBlocking
 
-println(io.github.stream29.simplemainkts.app.TestClasspath)
+//println(io.github.stream29.simplemainkts.app.TestClasspath)
 
 val clientConfig = OpenAIConfig(
     token = System.getenv("ALIBABA_QWEN_API_KEY")!!,

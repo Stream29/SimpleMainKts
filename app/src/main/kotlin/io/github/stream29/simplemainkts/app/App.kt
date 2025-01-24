@@ -4,22 +4,29 @@ import org.jetbrains.kotlin.mainKts.MainKtsScript
 import java.io.File
 import kotlin.script.experimental.api.*
 import kotlin.script.experimental.host.toScriptSource
+import kotlin.time.measureTimedValue
 
-// This is the main entry point of the application.
-// It uses the `Printer` class from the `:utils` subproject.
-fun main() {
-    eval(
-        sourceCode = File("script/test.main.kts").toScriptSource(),
-        receiver = "receiver",
-        classLoader = Thread.currentThread().contextClassLoader,
-        args = arrayOf("arg1", "arg2")
-    ).onSuccess {
-        println("Script executed successfully")
-        println("return value = ${it.returnValue}")
-        ResultWithDiagnostics.Success(it)
-    }.onFailure {
-        println("Script failed to execute")
-        println("Errors: ${it.reports.joinToString("\n")}")
+fun main(args: Array<String>) {
+    if (args.isEmpty()) {
+        println("Parameter missing: script file path")
+        return
+    }
+    measureTimedValue {
+        eval(
+            sourceCode = File(args[0]).toScriptSource(),
+            receiver = "receiver",
+            classLoader = Thread.currentThread().contextClassLoader,
+            args = arrayOf("arg1", "arg2")
+        )
+    }.run {
+        value.onSuccess {
+            println("Script executed successfully in $duration")
+            println("return value = ${it.returnValue}")
+            ResultWithDiagnostics.Success(it)
+        }.onFailure {
+            println("Script failed to execute")
+            println("Errors: ${it.reports.joinToString("\n")}")
+        }
     }
 }
 
